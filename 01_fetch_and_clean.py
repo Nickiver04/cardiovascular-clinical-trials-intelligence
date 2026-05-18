@@ -41,7 +41,7 @@ def fetch_trials(max_records=5000):
     all_studies = []
     next_page_token = None
     page = 1
-    print("🔍 Fetching cardiovascular trials...")
+    print(" Fetching cardiovascular trials...")
     while len(all_studies) < max_records:
         params = PARAMS.copy()
         if next_page_token:
@@ -51,19 +51,19 @@ def fetch_trials(max_records=5000):
             response.raise_for_status()
             data = response.json()
         except requests.exceptions.RequestException as e:
-            print(f"  ⚠️  Request failed on page {page}: {e}")
+            print(f"    Request failed on page {page}: {e}")
             break
         studies = data.get("studies", [])
         if not studies:
             break
         all_studies.extend(studies)
-        print(f"  ✅ Page {page}: {len(studies)} studies | Total: {len(all_studies)}")
+        print(f"   Page {page}: {len(studies)} studies | Total: {len(all_studies)}")
         next_page_token = data.get("nextPageToken")
         if not next_page_token:
             break
         page += 1
         time.sleep(0.5)
-    print(f"\n📦 Total fetched: {len(all_studies)}")
+    print(f"\n Total fetched: {len(all_studies)}")
     return all_studies
 
 
@@ -127,12 +127,12 @@ def parse_study(study):
 def parse_all_studies(studies):
     records = [parse_study(s) for s in studies]
     df = pd.DataFrame(records)
-    print(f"📊 Parsed shape: {df.shape}")
+    print(f" Parsed shape: {df.shape}")
     return df
 
 
 def clean_data(df):
-    print("🧹 Cleaning data...")
+    print(" Cleaning data...")
     df = df.drop_duplicates(subset="nct_id")
     df = df.dropna(subset=["nct_id", "brief_title", "overall_status"])
 
@@ -181,18 +181,18 @@ def clean_data(df):
         "phase_clean": "phase",
         "sponsor_class_clean": "sponsor_class",
     })
-    print(f"  ✅ Final shape: {df.shape}")
+    print(f"  Final shape: {df.shape}")
     return df
 
 
 def save_data(df):
     out_path = os.path.join(OUTPUT_DIR, "cv_trials_cleaned.csv")
     df.to_csv(out_path, index=False)
-    print(f"\n💾 Saved to: {out_path}")
+    print(f"\n Saved to: {out_path}")
     print(f"   Rows: {len(df)} | Columns: {len(df.columns)}")
-    print(f"\n📈 Status:\n{df['status'].value_counts().to_string()}")
-    print(f"\n📈 Phase:\n{df['phase'].value_counts().to_string()}")
-    print(f"\n📈 Sponsor class:\n{df['sponsor_class'].value_counts().to_string()}")
+    print(f"\n Status:\n{df['status'].value_counts().to_string()}")
+    print(f"\nPhase:\n{df['phase'].value_counts().to_string()}")
+    print(f"\n Sponsor class:\n{df['sponsor_class'].value_counts().to_string()}")
     return out_path
 raw_studies = fetch_trials(max_records=5000)
 df_raw = parse_all_studies(raw_studies)
